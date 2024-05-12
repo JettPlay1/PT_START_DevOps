@@ -13,11 +13,11 @@ services:
     user: postgres
     restart: always
     ports:
-      - ${DB_PORT}:5432
+      - 5432:5432
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: postgres
+      POSTGRES_DB: db_main
+      POSTGRES_PASSWORD: qwerty123
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
     command: |
@@ -36,10 +36,10 @@ services:
     user: postgres
     restart: always
     ports:
-      - ${DB_REPL_PORT}:5432
+      - 5433:5432
     environment:
-      PGUSER: ${DB_REPL_USER}
-      PGPASSWORD: ${DB_REPL_PASSWORD}
+      PGUSER: repl_user
+      PGPASSWORD: qwerty123
     command: |
       bash -c "
       until pg_basebackup --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=db_image --port=5432

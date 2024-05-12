@@ -1,6 +1,6 @@
 import logging
 from dotenv import load_dotenv
-load_dotenv("../.env")
+load_dotenv()
 import os
 import re
 import paramiko
