@@ -20,9 +20,8 @@ USERNAME = os.getenv("RM_USER")
 PASSWORD = os.getenv("RM_PASSWORD")
 
 
-# Включаем логирование (В файл logfile.txt)
-logging.basicConfig(
-    filename="app.log", 
+# Включаем логирование
+logging.basicConfig( 
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", 
     level=logging.INFO
 )
