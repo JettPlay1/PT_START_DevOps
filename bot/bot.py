@@ -4,6 +4,7 @@ load_dotenv()
 import os
 import re
 import paramiko
+import subprocess
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
@@ -339,7 +340,9 @@ def get_services_command(update: Update, context):
 
 # Вывод логов о репликации
 def get_replication_logs(update: Update, context):
-    data = execute_command_by_ssh("docker logs db_image | grep -i replica | tail -10")
+    result  = subprocess.run(["cat", "/db/postgresql.log"], stdout=subprocess.PIPE, text=True)
+    grepped = subprocess.run(["grep", "-i", "replica"], input=result.stdout, stdout=subprocess.PIPE, text=True)
+    data    = subprocess.run(["tail", "-10"], input=grepped.stdout, stdout=subprocess.PIPE, text=True).stdout
     update.message.reply_text(data)
 
 
