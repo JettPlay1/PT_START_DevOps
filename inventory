@@ -1,0 +1,2 @@
+[servers]
+ubuntu0 ansible_host=0.0.0.0 ansible_user=ubuntu0 ansible_password=qwerty123

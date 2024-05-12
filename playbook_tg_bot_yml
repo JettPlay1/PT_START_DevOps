@@ -1,0 +1,61 @@
+- name: Preparing system to start bot and starting bot
+  hosts: servers
+  become: yes
+
+  tasks:
+
+  - name: Installing requirements
+    apt:
+      name:
+        - git
+        - ca-certificates
+        - curl
+      state: latest
+  
+  - name: Make /etc/apt/keyrings directory
+    file:
+      path: /etc/apt/keyrings
+      state: directory
+      mode: 0755
+  
+  - name: Installing Docker gpg
+    get_url:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      dest: /etc/apt/keyrings/docker.asc
+      mode: 0755
+  
+  - name: Adding apt repo
+    shell: |
+      echo \
+       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+       $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+       sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+  
+  - name: Installing Docker
+    apt:
+      name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: latest
+
+  - name: Clone bot from github
+    git:
+      repo: https://github.com/JettPlay1/PT_START_DevOps.git
+      dest: ~/
+  
+  - name: Building docker images
+    docker_compose:
+      project_src: ~/PT_START_DevOps.git
+      build: yes
+  
+  - name: Deploying Docker containers
+    docker_compose:
+    project_src: ~/PT_START_DevOps.git
+    state: started
