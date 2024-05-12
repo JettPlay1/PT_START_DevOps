@@ -43,19 +43,19 @@
       - containerd.io
       - docker-buildx-plugin
       - docker-compose-plugin
-    state: latest
+      state: latest
 
   - name: Clone bot from github
     git:
       repo: https://github.com/JettPlay1/PT_START_DevOps.git
-      dest: ~/
+      dest: /home/tg_bot
   
   - name: Building docker images
     docker_compose:
-      project_src: ~/PT_START_DevOps.git
+      project_src: /home/tg_bot
       build: yes
   
   - name: Deploying Docker containers
     docker_compose:
-    project_src: ~/PT_START_DevOps.git
-    state: started
+      project_src: /home/tg_bot
+      state: started
