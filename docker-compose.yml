@@ -1,7 +1,9 @@
 version: '3.8'
 services:
   bot_image:
-    build: ./bot
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
     container_name: bot_image
     restart: always
     volumes:

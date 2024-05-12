@@ -4,6 +4,8 @@ RUN apk add --update build-base gcc postgresql-dev
 
 WORKDIR /app
 
-COPY . .
+COPY .env .env
+COPY bot/* .
+
 RUN pip3 install -r requirements.txt
 CMD ["python", "-u", "bot.py"]
