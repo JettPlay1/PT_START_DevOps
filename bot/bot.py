@@ -54,7 +54,7 @@ def execute_command_by_ssh(command):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         # Инициируем подключение по SSH
-        client.connect(hostname=RM_HOST, username=RMUSER, password=RM_PASSWORD, port=RM_PORT)
+        client.connect(hostname=RM_HOST, username=RM_USER, password=RM_PASSWORD, port=RM_PORT)
 
         # Выполняем команду на машинке
         stdin, stdout, stderr = client.exec_command(command)
