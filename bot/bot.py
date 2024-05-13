@@ -340,7 +340,7 @@ def get_services_command(update: Update, context):
 
 # Вывод логов о репликации
 def get_replication_logs(update: Update, context):
-    result  = subprocess.run(["cat", "/var/log/postgresql/postgresql.log"], stdout=subprocess.PIPE, text=True)
+    result  = subprocess.run(["cat", "/var/log/postgresql/postgresql*.log"], stdout=subprocess.PIPE, text=True)
     grepped = subprocess.run(["grep", "-i", "replica"], input=result.stdout, stdout=subprocess.PIPE, text=True)
     data    = subprocess.run(["tail", "-10"], input=grepped.stdout, stdout=subprocess.PIPE, text=True).stdout
     update.message.reply_text(data)
