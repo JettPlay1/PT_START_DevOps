@@ -6,8 +6,8 @@
     - name: Installing PostgreSQL
       apt:
         name:
-          - postgresql
-          - postgresql-contrib
+          - postgresql-14
+          - postgresql-contrib-14
         state: present
 
     - name: Uploading .pgpass
@@ -68,7 +68,7 @@
     - name: Adding address to postgresql.conf
       lineinfile:
         path: /etc/postgresql/14/main/postgresql.conf
-        line: "listen_addresses='*'"
+        line: "listen_addresses='localhost, {{ hostvars['db']['ansible_host'] }}'"
         insertafter: EOF
 
     - name: Removing files from /var/lib/postresql/14/main/ folder
@@ -77,7 +77,7 @@
     
     - name: Running pg_basebackup
       become_user: postgres
-      shell: pg_basebackup -R -h 192.168.56.117 -U repl_user -D /var/lib/postgresql/14/main
+      shell: pg_basebackup -R -h {{ hostvars['db']['ansible_host'] }} -U repl_user -D /var/lib/postgresql/14/main
     
     - name: Starting PostgreSQL service
       service:
