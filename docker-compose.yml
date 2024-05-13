@@ -7,7 +7,7 @@ services:
       - .env
     restart: always
     volumes:
-      - ./db/:/db/
+      - ./db/:/var/log/postgresql/
 
   db_image:
     build: ./db

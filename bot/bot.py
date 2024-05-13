@@ -15,10 +15,10 @@ MAX_MESSAGE_SIZE = 4096
 
 # Читаем переменные окружения
 TOKEN = os.getenv("TOKEN")
-HOST = os.getenv("RM_HOST")
-PORT = os.getenv("RM_PORT")
-USERNAME = os.getenv("RM_USER")
-PASSWORD = os.getenv("RM_PASSWORD")
+RM_HOST = os.getenv("RM_HOST")
+RM_PORT = os.getenv("RM_PORT")
+RM_USER = os.getenv("RM_USER")
+RM_PASSWORD = os.getenv("RM_PASSWORD")
 
 
 # Включаем логирование
@@ -54,7 +54,7 @@ def execute_command_by_ssh(command):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         # Инициируем подключение по SSH
-        client.connect(hostname=HOST, username=USERNAME, password=PASSWORD, port=PORT)
+        client.connect(hostname=RM_HOST, username=RMUSER, password=RM_PASSWORD, port=RM_PORT)
 
         # Выполняем команду на машинке
         stdin, stdout, stderr = client.exec_command(command)
@@ -340,7 +340,7 @@ def get_services_command(update: Update, context):
 
 # Вывод логов о репликации
 def get_replication_logs(update: Update, context):
-    result  = subprocess.run(["cat", "/db/postgresql.log"], stdout=subprocess.PIPE, text=True)
+    result  = subprocess.run(["cat", "/var/log/postgresql/postgresql.log"], stdout=subprocess.PIPE, text=True)
     grepped = subprocess.run(["grep", "-i", "replica"], input=result.stdout, stdout=subprocess.PIPE, text=True)
     data    = subprocess.run(["tail", "-10"], input=grepped.stdout, stdout=subprocess.PIPE, text=True).stdout
     update.message.reply_text(data)
