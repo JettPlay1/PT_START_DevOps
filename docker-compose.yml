@@ -8,6 +8,8 @@ services:
     restart: always
     volumes:
       - ./db/:/var/log/postgresql/
+    networks:
+      net:
 
   db_image:
     build: ./db
@@ -35,6 +37,9 @@ services:
       -c log_filename='postgresql.log'
     volumes:
       - ./db:/var/log/postgresql
+    networks:
+      net:
+        ipv4_address: ${DB_HOST}
 
   db_repl_image:
     build: ./db_repl
@@ -59,3 +64,12 @@ services:
       "
     depends_on:
       - db_image
+    networks:
+      net:
+        ipv4_address: ${DB_REPL_HOST}
+
+networks:
+  net:
+    ipam:
+      config:
+        - subnet: ${DOCKER_SUBNET}
