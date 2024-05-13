@@ -9,7 +9,7 @@ services:
     volumes:
       - ./db/:/var/log/postgresql/
     networks:
-      net:
+      - net
 
   db_image:
     build: ./db
