@@ -1,5 +1,5 @@
-- name: Installing and setting up PostgreSQL master
-  hosts: db
+- name: Installing PostgreSQL
+  hosts: databases
   become: yes
 
   tasks:
@@ -8,15 +8,18 @@
         name:
           - postgresql-14
           - postgresql-contrib-14
-        state: present
-
+    
     - name: Uploading .pgpass
-      become_user: postgres
       copy:
         src: .pgpass
         dest: /var/lib/postgresql/.pgpass
         mode: 0600
 
+- name: Setting up PostgreSQL master
+  hosts: db
+  become: yes
+
+  tasks:
     - name: Starting PostgreSQL
       service:
         name: postgresql
@@ -41,25 +44,11 @@
         name: postgresql
         state: restarted
 
-- name:  Installing and setting up PostgreSQL slave
+- name:  Setting up PostgreSQL slave
   hosts: db_repl
   become: yes
 
   tasks:
-    - name: Installing PostgreSQL
-      apt:
-        name:
-          - postgresql
-          - postgresql-contrib
-        state: present
-
-    - name: Uploading .pgpass
-      become_user: postgres
-      copy:
-        src: .pgpass
-        dest: /var/lib/postgresql/.pgpass
-        mode: 0600
-    
     - name: Stopping PostgreSQL
       service:
         name: postgresql
@@ -83,3 +72,33 @@
       service:
         name: postgresql
         state: started
+
+- name: Installing requirements and starting bot
+  hosts: tg_bot
+  become: yes
+
+  tasks:
+    - name: Installing Python
+      apt:
+        name:
+          - python3.10-dev
+          - libpq-dev
+          - git
+          - python3-pip
+
+    - name: Cloning repository
+      git:
+        repo: https://github.com/JettPlay1/PT_START_DevOps.git
+        dest: /home/tg_bot
+
+    - name: Installing requirements.txt
+      pip:
+        requirements: /home/tg_bot/bot/requirements.txt
+    
+    - name: Copying .env
+      copy:
+        src: .env
+        dest: /home/tg_bot/bot/.env
+
+    - name: Running bot
+      shell: "python3 /home/tg_bot/bot/bot.py &"
