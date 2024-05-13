@@ -24,7 +24,7 @@
 
     - name: Creating replication user
       become_user: postgres
-      shell: psql -c "CREATE USER repl_user WITH REPLICATION ENCRYPTED PASSWORD 'qwerty123';"
+      shell: psql -c "CREATE USER {{ hostvars['db']['DB_REPL_USER'] }} WITH REPLICATION ENCRYPTED PASSWORD '{{ hostvars['db']['DB_REPL_PASSWORD'] }}';"
 
     - name: Copying postgresql.conf
       template:
@@ -36,7 +36,7 @@
         src: pg_hba.conf
         dest: /etc/postgresql/14/main/pg_hba.conf
     
-    - name: Restarting Postgres
+    - name: Restarting PostgreSQL
       service:
         name: postgresql
         state: restarted
