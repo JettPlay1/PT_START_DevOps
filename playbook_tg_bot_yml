@@ -10,6 +10,7 @@
           - postgresql-contrib-14
     
     - name: Uploading .pgpass
+      become_user: postgres
       copy:
         src: .pgpass
         dest: /var/lib/postgresql/.pgpass
@@ -28,6 +29,25 @@
     - name: Creating replication user
       become_user: postgres
       shell: psql -c "CREATE USER {{ hostvars['db']['DB_REPL_USER'] }} WITH REPLICATION ENCRYPTED PASSWORD '{{ hostvars['db']['DB_REPL_PASSWORD'] }}';"
+
+    - name: Creating database 
+      become_user: postgres
+      shell: psql -c "CREATE DATABASE {{ hostvars['db']['DB_DATABASE'] }};"
+
+    - name: Creating tables
+      become_user: postgres
+      shell: |
+        psql -d {{ hostvars['db']['DB_DATABASE'] }} -c "CREATE TABLE IF NOT EXISTS emails(ID SERIAL PRIMARY KEY, email VARCHAR(255) NOT NULL);"
+        psql -d {{ hostvars['db']['DB_DATABASE'] }} -c "CREATE TABLE IF NOT EXISTS phone_numbers(ID SERIAL PRIMARY KEY, phone_number VARCHAR(20) NOT NULL);"
+        psql -d {{ hostvars['db']['DB_DATABASE'] }} -c "INSERT INTO emails (email) VALUES ('test@test.com'), ('test2@test2.ru');"
+        psql -d {{ hostvars['db']['DB_DATABASE'] }} -c "INSERT INTO phone_numbers (phone_number) VALUES ('88005553535'), ('+7 987 654 32 10');"
+    
+    - name: Creating users
+      become_user: postgres
+      shell: |
+        psql -d {{ hostvars['db']['DB_DATABASE'] }} -c "CREATE USER {{ hostvars['db']['DB_USER'] }} WITH ENCRYPTED PASSWORD '{{ hostvars['db']['DB_PASSWORD'] }}';"
+        psql -d {{ hostvars['db']['DB_DATABASE'] }} -c "GRANT SELECT, INSERT ON emails, phone_numbers TO {{ hostvars['db']['DB_USER'] }};"
+        psql -d {{ hostvars['db']['DB_DATABASE'] }} -c "GRANT ALL ON SEQUENCE phone_numbers_id_seq, emails_id_seq TO {{ hostvars['db']['DB_USER'] }};"
 
     - name: Copying postgresql.conf
       template:

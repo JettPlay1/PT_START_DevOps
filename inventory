@@ -1,6 +1,7 @@
 [databases]
-db ansible_host=192.168.56.117 ansible_user=ubuntu ansible_password=qwerty123 DB_REPL_USER=repl_user DB_REPL_PASSWORD=qwerty123
-db_repl ansible_host=192.168.56.116 ansible_user=ubuntu ansible_password=qwerty123
+db ansible_host=192.168.0.39 ansible_user=ubuntu ansible_password=qwerty123 DB_REPL_USER=repl_user DB_REPL_PASSWORD=qwerty123 DB_DATABASE=db_main DB_USER=tg_bot_user DB_PASSWORD=qwerty123
+db_repl ansible_host=192.168.0.40 ansible_user=ubuntu ansible_password=qwerty123
 
 [tg_bot]
-tg ansible_host=192.168.56.117 ansible_user=ubuntu ansible_password=qwerty123
+tg ansible_host=192.168.0.39 ansible_user=ubuntu ansible_password=qwerty123
+    
