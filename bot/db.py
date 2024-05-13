@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import logging
 load_dotenv("../.env")
-from os import getenv
+from os import getenv, path
 
 import psycopg2
 from psycopg2 import Error
@@ -9,10 +9,15 @@ from psycopg2 import Error
 # Читаем переменные окружения в локальные переменные
 DB_USER = getenv("DB_USER")
 DB_PASSWORD = getenv("DB_PASSWORD")
-DB_HOST = getenv("DB_HOST")
+
+# Если мы в контейнере, то можем обращаться по доменному имени
+DB_HOST: str
+if path.exists('/.dockerenv'):
+    DB_HOST = getenv("DOCKER_DB_HOST")
+else:
+    DB_HOST = getenv("DB_HOST")
 DB_PORT = getenv("DB_PORT")
 DB_DATABASE = getenv("DB_DATABASE")
-
 
 class database:
     def __init__(self):
