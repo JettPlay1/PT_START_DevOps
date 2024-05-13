@@ -1,61 +1,85 @@
-- name: Preparing system to start bot and starting bot
-  hosts: servers
+- name: Installing and setting up PostgreSQL master
+  hosts: db
   become: yes
 
   tasks:
+    - name: Installing PostgreSQL
+      apt:
+        name:
+          - postgresql
+          - postgresql-contrib
+        state: present
 
-  - name: Installing requirements
-    apt:
-      name:
-        - git
-        - ca-certificates
-        - curl
-      state: latest
-  
-  - name: Make /etc/apt/keyrings directory
-    file:
-      path: /etc/apt/keyrings
-      state: directory
-      mode: 0755
-  
-  - name: Installing Docker gpg
-    get_url:
-      url: https://download.docker.com/linux/ubuntu/gpg
-      dest: /etc/apt/keyrings/docker.asc
-      mode: 0755
-  
-  - name: Adding apt repo
-    shell: |
-      echo \
-       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-       $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-       sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  
-  - name: Update apt cache
-    apt:
-      update_cache: yes
-  
-  - name: Installing Docker
-    apt:
-      name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-      state: latest
+    - name: Uploading .pgpass
+      become_user: postgres
+      copy:
+        src: .pgpass
+        dest: /var/lib/postgresql/.pgpass
+        mode: 0600
 
-  - name: Clone bot from github
-    git:
-      repo: https://github.com/JettPlay1/PT_START_DevOps.git
-      dest: /home/tg_bot
-  
-  - name: Building docker images
-    docker_compose:
-      project_src: /home/tg_bot
-      build: yes
-  
-  - name: Deploying Docker containers
-    docker_compose:
-      project_src: /home/tg_bot
-      state: started
+    - name: Starting PostgreSQL
+      service:
+        name: postgresql
+        state: started
+
+    - name: Creating replication user
+      become_user: postgres
+      shell: psql -c "CREATE USER repl_user WITH REPLICATION ENCRYPTED PASSWORD 'qwerty123';"
+
+    - name: Copying postgresql.conf
+      template:
+        src: postgresql.conf
+        dest: /etc/postgresql/14/main/postgresql.conf
+    
+    - name: Copying pg_hba.conf
+      template:
+        src: pg_hba.conf
+        dest: /etc/postgresql/14/main/pg_hba.conf
+    
+    - name: Restarting Postgres
+      service:
+        name: postgresql
+        state: restarted
+
+- name:  Installing and setting up PostgreSQL slave
+  hosts: db_repl
+  become: yes
+
+  tasks:
+    - name: Installing PostgreSQL
+      apt:
+        name:
+          - postgresql
+          - postgresql-contrib
+        state: present
+
+    - name: Uploading .pgpass
+      become_user: postgres
+      copy:
+        src: .pgpass
+        dest: /var/lib/postgresql/.pgpass
+        mode: 0600
+    
+    - name: Stopping PostgreSQL
+      service:
+        name: postgresql
+        state: stopped
+    
+    - name: Adding address to postgresql.conf
+      lineinfile:
+        path: /etc/postgresql/14/main/postgresql.conf
+        line: "listen_addresses='*'"
+        insertafter: EOF
+
+    - name: Removing files from /var/lib/postresql/14/main/ folder
+      become_user: postgres
+      shell: rm -rf /var/lib/postgresql/14/main/*
+    
+    - name: Running pg_basebackup
+      become_user: postgres
+      shell: pg_basebackup -R -h 192.168.56.117 -U repl_user -D /var/lib/postgresql/14/main
+    
+    - name: Starting PostgreSQL service
+      service:
+        name: postgresql
+        state: started
